@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Sim Racers Randomizer V5.3</title>
+    <title>The Sim Racers Randomizer V5.4</title>
     
     <style>
         :root { --teal: #00f2ff; --orange: #ff6600; --dark-bg: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-dim: #a0a0a0; }
@@ -77,6 +77,16 @@
         }
 
         h1 { color: var(--teal); text-transform: uppercase; font-size: 1.3rem; margin: 0; }
+        
+        /* NEW STYLE FOR AMS2 LOGO */
+        .ams2-logo {
+            width: 90%; 
+            max-width: 400px;
+            height: auto;
+            margin: 10px 0 20px 0; /* Add space above and below */
+        }
+        /* END NEW STYLE */
+
         .version { 
             font-size: 0.65rem; 
             color: var(--text-dim); 
@@ -150,10 +160,11 @@
             <h1>Sim Racers Randomizer™</h1>
         </div>
 
+        <img src="AMS2_landscape_logo.png" alt="Automobilista 2 Logo" class="ams2-logo">
         <div class="stats-row">
-            <div class="stat-card"><div class="stat-label">Cars</div><div id="stat-cars" class="stat-value">0</div></div>
-            <div class="stat-card"><div class="stat-label">Tracks</div><div id="stat-tracks" class="stat-value">0</div></div>
-            <div class="stat-card"><div class="stat-label">Combos</div><div id="stat-combos" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Cars</div><div id="stat-cars" class="stat-value">203</div></div>
+            <div class="stat-card"><div class="stat-label">Tracks</div><div id="stat-tracks" class="stat-value">150</div></div>
+            <div class="stat-card"><div class="stat-label">Combos</div><div id="stat-combos" class="stat-value">30450</div></div>
         </div>
 
         <div id="capture-area">
@@ -167,7 +178,7 @@
     <button class="btn-roll" onclick="pickRandom()">Generate Random Combo</button>
     
     <div id="bulk-util-panel" class="hidden"> 
-        <div class="version">Version V5.3</div> 
+        <div class="version">Version V5.4</div> 
         
         <div style="text-align: left;">
             
@@ -676,6 +687,11 @@
     // Attach password protection to the '™' activator on load
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tm-activator').addEventListener('click', passwordProtectedToggle);
+        // Note: Hardcoding initial stats for first-time load consistency
+        // This is purely for display before the user hits the roll button or opens the panel.
+        document.getElementById('stat-cars').innerText = DEFAULT_CARS.length;
+        document.getElementById('stat-tracks').innerText = DEFAULT_TRACKS.length;
+        document.getElementById('stat-combos').innerText = (DEFAULT_CARS.length * DEFAULT_TRACKS.length).toLocaleString();
     });
 
     function updateUI() {
@@ -715,6 +731,8 @@
 
         if (password === ADMIN_PASSWORD) {
             panel.classList.remove('hidden');
+            // Ensure lists are rendered when panel opens
+            updateUI(); 
         } else if (password !== null) { 
             alert("Incorrect password. Access denied.");
         }
@@ -836,8 +854,8 @@
         }
     }
 
-    // Initial update call
-    updateUI();
+    // Initial update call (This ensures default data is loaded on the first run)
+    updateUI(); 
 </script>
 </body>
 </html>
