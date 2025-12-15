@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Sim Racers Randomizer V5.8</title>
+    
+    <style>
+        :root { --teal: #00f2ff; --orange: #ff6600; --dark-bg: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-dim: #a0a0a0; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background-color: #0a0a0a; 
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px; 
+            margin: 0; 
+            position: relative;
+            min-height: 100vh;
+        }
+
+        #tiled-logo-background {
+            position: fixed; 
+            top: -100%;
+            left: -100%;
+            width: 300%; 
+            height: 300%;
+            
+            background-image: url('tsra_logo.png'); 
+            background-repeat: repeat;
+            background-size: 140px 80px; 
+            
+            opacity: 0.06; 
+            transform: rotate(15deg); 
+            
+            z-index: -1; 
+        }
+        
+        .app-container { 
+            width: 100%; 
+            max-width: 450px; 
+            text-align: center; 
+            position: relative; 
+            z-index: 1;
+        }
+        
+        #shareable-content {
+            background-color: transparent; 
+            padding: 10px; 
+            border-radius: 10px; 
+        }
+
+        .logo-img { 
+            width: 180px; 
+            height: auto; 
+            filter: drop-shadow(0 0 5px rgba(0,242,255,0.2)); 
+            margin-bottom: 5px; 
+            cursor: pointer; 
+        }
+        
+        /* .logo-text removed in V5.8 */
+
+        .tm-activator {
+            font-size: 0.6em; 
+            vertical-align: super; 
+            font-weight: 400;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        h1 { color: var(--teal); text-transform: uppercase; font-size: 1.3rem; margin: 0; }
+        
+        .ams2-logo {
+            width: 90%; 
+            max-width: 400px;
+            height: auto;
+            margin: 10px 0 20px 0; 
+            cursor: pointer; 
+        }
+
+        .version { 
+            font-size: 0.65rem; 
+            color: var(--text-dim); 
+            margin-top: 5px; 
+            margin-bottom: 20px; 
+            text-transform: uppercase; 
+            text-align: left; 
+        } 
+
+        .stats-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1.2fr; 
+            gap: 8px; 
+            margin-bottom: 20px; 
+        }
+        .stat-card { background: #1a1a1a; border-bottom: 2px solid var(--teal); padding: 10px 5px; border-radius: 4px; }
+        .stat-label { font-size: 0.6rem; color: var(--text-dim); }
+        .stat-value { font-size: 0.9rem; font-weight: bold; color: var(--teal); }
+        
+        #capture-area { 
+            background: #1a1a1a; 
+            border: 2px solid var(--teal); 
+            border-radius: 12px; 
+            padding: 25px 15px; 
+            margin-bottom: 20px; 
+        }
+        .display-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        .value { font-size: 1.2rem; font-weight: 800; color: var(--orange); min-height: 1.5em; text-transform: uppercase; }
+
+        .btn-roll { 
+            width: 100%; 
+            background: linear-gradient(135deg, var(--orange) 0%, #cc5200 100%); 
+            color: white; 
+            border: none; 
+            padding: 18px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            margin-bottom: 15px; 
+        }
+        
+        /* YouTube Button Styling (V5.7: Smaller, Centered) */
+        .btn-youtube {
+            width: 80%; 
+            background: #FF0000; 
+            color: white;
+            border: none;
+            padding: 12px; 
+            font-size: 0.95rem; 
+            font-weight: 600;
+            border-radius: 50px; 
+            cursor: pointer;
+            text-transform: uppercase;
+            display: block;
+            margin: 15px auto 30px auto; 
+        }
+
+        .section-header { color: var(--teal); text-align: left; font-size: 0.9rem; text-transform: uppercase; border-bottom: 2px solid var(--orange); margin: 15px 0 10px 0; }
+        .manual-input-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .manual-input-group input { flex-grow: 1; background: #252525; border: 1px solid #444; border-radius: 6px; padding: 10px; color: white; outline: none; }
+        .btn-manual-add { background: var(--teal); color: #000; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .bulk-area { 
+            width: 100%; 
+            background: #252525; 
+            border: 1px solid #444; 
+            border-radius: 6px; 
+            padding: 10px; 
+            color: white; 
+            height: 100px; 
+            font-size: 0.8rem; 
+            margin-bottom: 10px; 
+            box-sizing: border-box; 
+        }
+        .btn-add-bulk { background: var(--teal); color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; margin-bottom: 20px; }
+        .list-container { text-align: left; background: #181818; border-radius: 8px; max-height: 100px; overflow-y: auto; border: 1px solid #333; margin-bottom: 10px; }
+        .list-item { padding: 8px 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; font-size: 0.8rem; }
+        .remove-btn { color: var(--orange); cursor: pointer; }
+        .utility-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 25px; }
+        .btn-util { flex: 1; background: #333; color: var(--text-dim); border: none; padding: 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; }
+
+        /* CSS for hiding the panel */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="tiled-logo-background"></div>
+
+<div class="app-container">
+
+    <div id="shareable-content">
+        <div class="logo-container">
+            <a href="https://www.youtube.com/@SimRacersArms" target="_blank">
+                <img src="tsra_logo.png" alt="TSRA Logo" class="logo-img">
+                <h1>Sim Racers Randomizer<span id="tm-activator" class="tm-activator">™</span></h1>
+            </a>
+        </div>
+
+        <a href="https://www.youtube.com/@SimRacersArms" target="_blank">
+            <img src="AMS2_landscape_logo.png" alt="Automobilista 2 Logo" class="ams2-logo">
+        </a>
+
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Cars</div><div id="stat-cars" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Tracks</div><div id="stat-tracks" class="stat-value">0</div></div>
+            <div class="stat-card"><div class="stat-label">Combos</div><div id="stat-combos" class="stat-value">0</div></div>
+        </div>
+
+        <div id="capture-area">
+            <div class="display-grid">
+                <div><div class="label">Car</div><div id="car-display" class="value">---</div></div>
+                <div><div class="label">Track</div><div id="track-display" class="value">---</div></div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-roll" onclick="pickRandom()">Generate Random Combo</button>
+    
+    <a href="https://www.youtube.com/@SimRacersArms" target="_blank" class="btn-youtube">
+        Visit The Sim Racers Arms on YouTube
+    </a>
+
+    <div id="bulk-util-panel" class="hidden"> 
+        <div class="version">Version V5.8</div> 
+        
+        <div style="text-align: left;">
+            
+            <div class="section-header">Manual Car Add</div>
+            <div class="manual-input-group">
+                <input type="text" id="manual-car-input" placeholder="Enter single car...">
+                <button class="btn-manual-add" onclick="manualAddItem('car')">ADD</button>
+            </div>
+
+            <div class="section-header">Manual Track Add</div>
+            <div class="manual-input-group">
+                <input type="text" id="manual-track-input" placeholder="Enter single track...">
+                <button class="btn-manual-add" onclick="manualAddItem('track')">ADD</button>
+            </div>
+        </div>
+
+        <div id="car-list" class="list-container"></div>
+        <div id="track-list" class="list-container"></div>
+        
+        <div style="text-align: left;">
+            <div class="section-header">Bulk Add Cars (Paste from Sheets)</div>
+            <textarea id="bulk-car-input" class="bulk-area" placeholder="Paste car list from Sheets here..."></textarea>
+            <button class="btn-add-bulk" onclick="processBulk('car')">Import Cars</button>
+
+            <div class="section-header">Bulk Add Tracks (Paste from Sheets)</div>
+            <textarea id="bulk-track-input" class="bulk-area" placeholder="Paste track list from Sheets here..."></textarea>
+            <button class="btn-add-bulk" onclick="processBulk('track')">Import Tracks</button>
+        </div>
+    
+        <div class="utility-row">
+            <button class="btn-util" onclick="exportListForSheets()">📋 Export List</button> 
+            <button class="btn-util" onclick="exportJSONData()">💾 Export JSON</button> 
+            <input type="file" id="fileInput" style="display:none" onchange="importData(event)">
+            <button class="btn-util" style="background:#cc0000; color:white;" onclick="clearAll()">🗑️ Clear All</button>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="btn-util" style="width: 100%;" onclick="document.getElementById('fileInput').click()">📂 Import JSON</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Configuration ---
+    const ADMIN_PASSWORD = "tsra-admin"; // <-- CHANGE THIS PASSWORD
+    // ---------------------
+
+    // --- Default Data Lists (YOUR CUSTOM LISTS) ---
+    const DEFAULT_CARS = [
+        "Alpine A110 GT4 EVO (DLC)",
+        "Alpine A424 (LMDh GTP Hypercar) (DLC)",
+        "ARC Camaro",
+        "Aston Martin Vantage GT3 Evo (GT3 G2) (DLC)",
+        "Aston Martin Vantage GT4 EVO (DLC)",
+        "Aston Martin Vantage GTE (DLC)",
+        "Aston Martin Valkyrie Hypercar (DLC)",
+        "Audi V8 Quattro (DTM)",
+        "Audi R8 LMP1 (Enduro Pck) (DLC)",
+        "Audi R8 LMS GT3 (GT3 G1)",
+        "Audi R8 LMS GT3 EVO II (DLC) (GT3 G2)",
+        "Audi R8 LMS GT4",
+        "BMW 2002 Turbo (Vintage Touring T1)",
+        "BMW M1 Procar",
+        "BMW M Hybrid V8 (LMDh GTP Hypercar) (DLC)",
+        "BMW M3 Sport Evo Group A (DTM)",
+        "BMW M3 E46 GTR (GT Pack) (DLC)",
+        "BMW M4 GT4",
+        "BMW M4 GT3 (GT3 G2)",
+        "BMW M6 GT3 (GT3 G1)",
+        "BMW M8 GTE (DLC)",
+        "Brabham BT26A (F-Vint G2)",
+        "Brabham BT44",
+        "Brabham Alfa BT46B (F-Rtro G2)",
+        "Brabham Cosworth BT49 (F-Rtro G2)",
+        "Brabham BMW BT52 (F-Rtro G3)",
+        "Brabham BT62 (Hyper Cars)",
+        "Cadillac DPi-VR",
+        "Cadillac V-Series.R (LMDh GTP Hypercar) (DLC)",
+        "Caterham 620R",
+        "Caterham Academy",
+        "Caterham Superlight",
+        "Caterham Supersport",
+        "Chevrolet Camaro GT4.R",
+        "Chevrolet Camaro SS (Street Cars)",
+        "Chevrolet Chevette",
+        "Chevrolet Corvette C3 (Vintage Touring T1)",
+        "Chevrolet Corvette C3.R (GT Classics)",
+        "Chevrolet Corvette C3.R Convertable (GT Classics)",
+        "Chevrolet Corvette C5-R GT1 (GT Pack) (DLC)",
+        "Chevrolet Corvette C8 Z06 (+Z07) (Super Cars) (DLC)",
+        "Chevrolet Corvette C8.R (GTE) (DLC)",
+        "Chevrolet Corvette GTP (Group C)",
+        "Chevrolet Corvette Z06 GT3.R (GT3 G2) (DLC)",
+        "Chevrolet Cruze Stock Car 2019 (StockCar)",
+        "Chevrolet Cruze Stock Car 2020 (StockCar Nova)",
+        "Chevrolet Cruze Stock Car 2021",
+        "Chevrolet Cruze Stock Car 2022 (Pro Series)",
+        "Chevrolet Cruze Stock Car 2023",
+        "Chevrolet Cruze Stock Car 2024",
+        "Chevrolet Omega Stock Car 1999 (StockCar Brazil)",
+        "Chevrolet Opala (Old Stock Race)",
+        "Chevrolet Opala (Stock Cars 79)",
+        "Chevrolet Opala (Stock Cars 86)",
+        "Copa Fusca",
+        "Copa Montana",
+        "Copa Uno",
+        "Citroen DS3 (RX) (DLC)",
+        "Courage C60 Hybrid (Enduro Pck) (DLC)",
+        "Dallara F301 (F3)",
+        "Dallara F309 (F3)",
+        "Dallara SP1 (Enduro Pck) (DLC)",
+        "Dodge Viper GTS-R GT1 (GT Pack) (DLC)",
+        "Formula Classic Gen1 Md1",
+        "Formula Classic Gen1 Md2",
+        "Formula Classic Gen2 Md1",
+        "Formula Classic Gen2 Md2",
+        "Formula Classic Gen2 Md3",
+        "Formula Classic Gen3 Md1",
+        "Formula Classic Gen3 Md2",
+        "Formula Classic Gen3 Md3",
+        "Formula Classic Gen3 Md4",
+        "Formula Classic Gen4 Md1",
+        "Formula Classic Gen4 Md2",
+        "Formula Classic Gen4 Md3",
+        "Formula Dirt (DLC)",
+        "Formula HiTech Gen1 Model1 (DLC)",
+        "Formula HiTech Gen1 Model2 (DLC)",
+        "Formula HiTech Gen1 Model3 (DLC)",
+        "Formula HiTech Gen1 Model4 (DLC)",
+        "Formula HiTech Gen2 Model1 (DLC)",
+        "Formula HiTech Gen2 Model2 (DLC)",
+        "Formula HiTech Gen2 Model3 (DLC)",
+        "Formula Inter MG-15",
+        "Formula Junior",
+        "Formula Reiza",
+        "Formula Retro Gen2",
+        "Formula Retro Gen3 DFV",
+        "Formula Retro Gen3 Turbo",
+        "Formula Retro V12 (F-Ret G1)",
+        "Formula Retro V8 (F-Ret G1)",
+        "Formula Trainer",
+        "Formula Trainer Advanced",
+        "Formula Ultimate Gen1 2019",
+        "Formula Ultimate Gen2 2022",
+        "Formula USA 2023 (DLC)",
+        "Formula V10 Gen1",
+        "Formula V10 Gen2",
+        "Formula V12",
+        "Formula Vee",
+        "Formula Vee Fin",
+        "Formula Vee (Gen2)",
+        "Formula Vintage Gen1 Md1",
+        "Formula Vintage Gen1 Md2",
+        "Formula Vintage Gen2 Md1",
+        "Formula Vintage Gen2 Md2",
+        "Fusca 1 (Hot Cars)",
+        "Fusca 2 (Hot Cars)",
+        "Fusca Classic FL",
+        "Ginetta G40 GT5",
+        "Ginetta G40 Cup",
+        "Ginetta G55 GT3 (GT Open)",
+        "Ginetta G55 GT4",
+        "Ginetta G55 GT4 Supercup",
+        "Ginetta G58 (P1 G1)",
+        "Ginetta G58 (P1 G2) (V1.5)",
+        "Gol Classic B",
+        "Gol Classic FL",
+        "Gol (Hot Cars)",
+        "Kart Cross (DLC)",
+        "Lamborghini Diablo (Super Tropfeo) (DLC)",
+        "Lamborghini Huracan GT3 EVO2 (GT3 G2) (DLC)",
+        "Lamborghini Huracan Super Trofeo EVO2 (DLC)",
+        "Lamborghini Mercielago R-GT GT1 (Lambo Pk 2) (DLC)",
+        "Lamborghini Miura (Vintage Tier 1) (DLC)",
+        "Lamborghini Revuelto (Hypercar) (DLC)",
+        "Lamborghini SC63 (LMDh GTP Hypercar) (DLC)",
+        "Lamborghini Veneno Roadster (Hyper Cars) (DLC)",
+        "Ligier JS2-R (Euro Series) (DLC)",
+        "Ligier JS P217 (LMP2 G1) (DLC)",
+        "Ligier JS P217 (LMP2 G2) (DLC)",
+        "Ligier JS P320 (P1 G2)",
+        "Ligier JS P4 (Euro Series) (DLC)",
+        "Lola T95/00 Ford Cosworth (F-USA G1)",
+        "Lola T95/00 Mercedes-Benz (F-USA G1)",
+        "Lola T98/00 Ford Cosworth (F-USA G2)",
+        "Lola B2K00 Ford Cosworth (F-USA G3)",
+        "Lola B2K00 Mercedes-Benz (F-USA G3)",
+        "Lola B2K00 Toyota (F-USA G3)",
+        "Lola B05/40 Turbo LMP2 2005 (Enduro Pck?) (DLC)",
+        "Lola B05/40 V8 LMP2 2005 (Enduro Pck?) (DLC)",
+        "Lotus 23 (Vintage Tier 2)",
+        "Lotus 49C Cosworth (F-Vint G2)",
+        "Lotus 72E (F-Rtro G1)",
+        "Lotus 79 (F-Rtro G2)",
+        "Lotus 98T (DLC) F-Clssc G1",
+        "Maserati MC12 GT1 (GT Pack) (DLC)",
+        "McLaren 570S GT4",
+        "McLaren 720S GT3 (G1)",
+        "McLaren 720S GT3 EVO (G2)",
+        "Mclaren F1 GTR (GT1)",
+        "McLaren F1 LM (Street Cars)",
+        "Mclaren Cosworth MP4/1C F-Ret 3",
+        "Mclaren Honda MP4/4 (DLC) F-Clsc G2",
+        "Mclaren Honda MP4/5 (DLC) F-Clsc G3",
+        "Mclaren Honda MP4/6 (DLC) F-Clsc G4",
+        "Mclaren Honda MP4/7A (DLC) F-Htc",
+        "Mclaren Cosworth MP4/8 (DLC)  F-Htc",
+        "Mclaren M23 F-Rtro G1",
+        "Mclaren MP4/12",
+        "Mclaren Senna (Hyper Cars) (DLC)",
+        "MCR 2000 (P4)",
+        "Mercedes AMG GT3 (G1)",
+        "Mercedes AMG GT3 EVO (G2) (DLC)",
+        "Mercedes AMG GT4",
+        "Mercedes-Benz CLK LM (GT1)",
+        "Mercedes-Benz 190E 2.5-16 Evo II (DTM)",
+        "MetalMoro AJR Chevy V8 (P1 G1)",
+        "MetalMoro AJR Chevy V8 (P1 G2)",
+        "MetalMoro AJR Honda (P1 G1)",
+        "MetalMoro AJR Honda (P1 G2)",
+        "MetalMoro AJR Judd (P1 G1)",
+        "MetalMoro AJR Nissan V6 (P1 G1)",
+        "MetalMoro AJR Nissan V6 (P1 G2)",
+        "MetalMoro MRX Duratech (P4)",
+        "MetalMoro MRX Duratech Turbo (P2)",
+        "MetalMoro MRX Duratech Turbo (P3)",
+        "MetalMoro MRX Honda (P3)",
+        "Milano (Ferrari) GT36 GT2 (GT Pack) (DLC)",
+        "Mini Cooper JCW (UK)",
+        "Mini Cooper S 1965 (Vintage Touring T2)",
+        "Mini Cooper S 1965 B (Copa Classic)",
+        "Mini Countryman R60 (RX) (DLC)",
+        "Mitsubishi Lancer EVO10 (RX) (DLC)",
+        "Mitsubishi Lancer R",
+        "Mitsubishi Lancer RS",
+        "Nissan GT-R Nismo GT3 (G1)",
+        "Nissan R390 GT1 (GT1)",
+        "Nissan R89C (Group C)",
+        "Oreca 07 (LMP2 G1) (DLC)",
+        "Oreca 07 (LMP2 G2) (DLC)",
+        "Passat Classic B",
+        "Passat Classic FL",
+        "Passat (Hot Cars)",
+        "Porsche 911 GT1-98 (GT1)",
+        "Porsche 911 GT3 Cup 3.8 (991)",
+        "Porsche 911 GT3 Cup 4.0 (991)",
+        "Porsche 911 GT3 R (GT3 G1)",
+        "Porsche 911 RSR 74 (GT Classics)",
+        "Porsche 911 RSR GTE (DLC)",
+        "Porsche 962C (Group C)",
+        "Porsche 992 GT3 R (GT3 G2) (DLC)",
+        "Porsche 963 (LMDh GTP Hypercar) (DLC)",
+        "Porsche 996 GT3 RSR GT2 (GT Pack) (DLC)",
+        "Porsche Cayman GT4 Clubsport MR",
+        "Puma GTB",
+        "Puma GTE",
+        "Puma PO52 GT5",
+        "Reynard 95i Ford-Cosworth (DLC) F-USA G1",
+        "Reynard 95i Honda (DLC) F-USA G1",
+        "Reynard 95i Mercedes-Benz (DLC) F-USA G1",
+        "Reynard 98i Ford-Cosworth (DLC) F-USA G2",
+        "Reynard 98i Honda (DLC) F-USA G2",
+        "Reynard 98i Mercedes-Benz (DLC) F-USA G2",
+        "Reynard 98i Toyota (DLC) F-USA G2",
+        "Reynard 2Ki Ford-Cosworth (DLC) F-USA G3",
+        "Reynard 2Ki Honda (DLC) F-USA G3",
+        "Reynard 2Ki Mercedes-Benz (DLC) F-USA G3",
+        "Reynard 2Ki Toyota (DLC) F-USA G3",
+        "Roco 001 (P3)",
+        "Sauber Mercedes C9 (Group C)",
+        "Sigma P1 (P2)",
+        "Sigma P1 G5 V8 (P1 G2)",
+        "Sprint Race V6",
+        "Stock Car USA Gen1 (Stock USA DLC)",
+        "Stock Car USA Gen2 (Stock USA DLC)",
+        "Stock Car USA Gen3 (Stock USA DLC)",
+        "Stock Car USA Gen3 LM (Stock USA DLC)",
+        "Super V8",
+        "Super Trophy Trucks (STT) (DLC)",
+        "Swift 009c Ford-Cosworth (DLC) F-USA G2",
+        "Toyota Corolla Stock Car 2020",
+        "Toyota Corolla Stock Car 2021",
+        "Toyota Corolla Stock Car 2022 (Pro Series)",
+        "Toyota Corolla Stock Car 2023",
+        "Toyota Corolla Stock Car 2024",
+        "Ultima GTR (Super Cars)",
+        "Ultima GTR Race (GT Open)",
+        "Uno Classic B (CC-B)",
+        "VW Polo (TSi Cup)",
+        "VW Polo GTS (TSi Cup)",
+        "VW Polo (RX) (DLC)",
+        "VW Virtus (TSi Cup)",
+        "VW Virtus GTS (TSi Cup)",
+        "Iveco Stralis",
+        "MAN TGX",
+        "Mercedes-Benz Actros",
+        "Vulkan Truck",
+        "VW Constellation",
+        "Kart 125cc 2 Stroke",
+        "Kart GX390 Race",
+        "Kart GX390 Rental",
+        "Kart 125cc 2 Shifter",
+        "Superkart 250cc"
+    ];
+
+    const DEFAULT_TRACKS = [
+        "Adelaide",
+        "Adelaide STT",
+        "Adelaide 1988 (Historic)",
+        "Ascurra Dirt (DLC)",
+        "Ascurra RX (DLC)",
+        "Azure Circuit (Monaco GP)",
+        "Barcelona-Catalunya Gp No Chic DLC",
+        "Barcelona-Catalunya Gp +Chic DLC",
+        "Barcelona-Catalunya RX (DLC)",
+        "Barcelona-Catalunya-National DLC",
+        "Barcelona-Catalunya-Historic 1991 DLC",
+        "Bathurst 2020",
+        "Bathurst 1983 (DLC)",
+        "Brands Hatch (GP)",
+        "Brands Hatch (Indy layout)",
+        "Brasilia (Full)",
+        "Brasilia (Outer)",
+        "Buenos Aires #06",
+        "Buenos Aires #06 S",
+        "Buenos Aires #07",
+        "Buenos Aires #08",
+        "Buenos Aires #09",
+        "Buenos Aires #12",
+        "Buenos Aires #15",
+        "Cadwell Park",
+        "Campo Grande (Anti-Clock)",
+        "Canadian Tire Motorsport Park DLC",
+        "Cascais (Estoril)",
+        "Cascais (Estoril - Alternate)",
+        "Cascais 1988  (Estoril) DLC",
+        "Cascavel",
+        "Cleveland GP DLC",
+        "Cleveland ST",
+        "Cordoba #4",
+        "Cordoba TC",
+        "Cordoba #2",
+        "Curitiba",
+        "Curitiba (Outer)",
+        "Curvelo (Long) (Anti-Clock)",
+        "Curvelo (Short) (Anti-Clock)",
+        "Daytona Sports Car Course (USA DLC) (Anti-Clock)",
+        "Daytona Nascar Road Course (USA DLC) (Anti-Clock)",
+        "Daytona Tri-Oval (USA DLC) (Anti-Clock)",
+        "Donington GP",
+        "Donington National",
+        "Fontana Historic (DLC) (Anti-Clock)",
+        "Fontana - Auto Club Speedway Sports Car Course (DLC) (Anti-Clock)",
+        "Fontana - Auto Club Speedway Oval (DLC) (Anti-Clock)",
+        "Foz RX (DLC)",
+        "Galeao Aiport",
+        "Gateway - WWT Raceway Oval (DLC) (Anti-Clock)",
+        "Gateway - WWT Raceway Road Course (Short) (DLC) (Anti-Clock)",
+        "Gateway - WWT Raceway Road Course (Long) (DLC) (Anti-Clock)",
+        "Gesamtstrecke (Nords) Historic 1971 DLC",
+        "Goiania",
+        "Goiania (Short)",
+        "Goiania (External)",
+        "Guapore (Anti-Clock)",
+        "Guapore STT (Anti-Clock)",
+        "Hockenheimring (DLC)",
+        "Hockenheimring STT",
+        "Hockenheimring RX (DLC)",
+        "Hockenheimring National (DLC)",
+        "Hockenheimring Short A (DLC)",
+        "Hockenheimring Short B (DLC)",
+        "Hockenheimring Hist. '01 (DLC)",
+        "Hockenheimring Hist. '88 (DLC)",
+        "Hockenheimring Hist. '88 Short (DLC)",
+        "Hockenheimring Hist. '77 (DLC)",
+        "Ibarra (Autodromo Yauhacocha)",
+        "Ibarra Reverse (Autodromo Yauhacocha) (Anti-Clock)",
+        "Ibarra STT (Autodromo Yauhacocha)",
+        "Imola (Anti-Clock)",
+        "Imola Hist. '01 (Anti-Clock)",
+        "Imola Hist. '88 (Anti-Clock)",
+        "Imola Hist. '72 (Anti-Clock)",
+        "Indianoplis Oval  (Anti-Clock) (DLC)",
+        "Indianoplis Road (DLC)",
+        "Interlagos GP",
+        "Interlagos (Stock Car Brasil)",
+        "Interlagos Hist. '93 (DLC)",
+        "Interlagos Hist. '91 (DLC)",
+        "Interlagos Hist. '76",
+        "Interlagos Hist. '78 Outer",
+        "Jacuarpagua Hist. '05",
+        "Jacuarpagua Hist. '05 Oval",
+        "Jacuarpagua Hist. '88",
+        "Jacuarpagua Hist. '12 SCB",
+        "Jacuarpagua Hist. '12 Short",
+        "Jerez (Moto)",
+        "Jerez (Chicane)",
+        "Jerez 1988 (DLC)",
+        "Kansai GP (Suzuka)",
+        "Kansai (West)",
+        "Kansai (East)",
+        "Kansai (Classic)",
+        "Kyalami GP",
+        "Kyalami Hist. '76",
+        "Laguna Seca 2020 (USA Pt 1 DLC)",
+        "Le Mans 24hr (Le Mans DLC)",
+        "Le Mans Bugatti (Le Mans DLC)",
+        "Londrina (Short)",
+        "Londrina (Long)",
+        "Long Beach (USA Pt 1 DLC)",
+        "Long Beach STT",
+        "Montreal",
+        "Montreal Hist. '88",
+        "Montreal Hist. '91 (DLC)",
+        "Monza DLC",
+        "Monza (Junior) DLC",
+        "Monza (Historic 1991) DLC",
+        "Monza (Historic 1971) DLC",
+        "Monza (Historic 1971 Junior) DLC",
+        "Monza (Historic 1971 10k) DLC",
+        "Monza (Historic 1971 10k No Chicane) DLC",
+        "Nordschleife 2020 DLC",
+        "Nordschleife 24Hr 2020 DLC",
+        "Nordschleife Historic 1971 DLC",
+        "Nurburgring (GP 2020) DLC",
+        "Nurburgring (Veedol 2020) DLC",
+        "Nurburgring (Sprint 2020) DLC",
+        "Nurburgring (Sprint Short 2020) DLC",
+        "Nurburgring Betonschleife 1971",
+        "Nurburgring RX",
+        "Oulton Park International",
+        "Oulton Park International (Island)",
+        "Oulton Park International (Fosters)",
+        "Oulton Park International (Classic)",
+        "Road America",
+        "Road America STT",
+        "Road America (Chicane)",
+        "Road Atlanta (Michelin Raceway) DLC",
+        "Salvador Street Circuit",
+        "Santa Cruz du sol",
+        "Sebring International Raceway (DLC)",
+        "Sebring Int. School (DLC)",
+        "Sebring Int. Club (DLC)",
+        "Sebring Int. Club STT",
+        "Silverstone GP (DLC)",
+        "Silverstone (International) (DLC)",
+        "Silverstone (National) (DLC)",
+        "Silverstone (Historic 2001) (DLC)",
+        "Silverstone (International Historic 2001) DLC",
+        "Silverstone (National Historic 2001) DLC",
+        "Silverstone GP (Historic 1991) DLC",
+        "Silverstone GP (Historic 1975) DLC",
+        "Silverstone GP (Historic 1975 No Chicane) DLC",
+        "Snetterton 300",
+        "Snetterton 200",
+        "Snetterton 100",
+        "Spa Francorchamps 2020 DLC",
+        "Spa-Francorchamps 2022 DLC",
+        "Spa Francorchamps (Historic 1970) DLC",
+        "Spa Francorchamps (Historic 1970 1000km) DLC",
+        "Spa Francorchamps (Historic 1993) DLC",
+        "Spa Francorchamps RX (DLC)",
+        "Speilberg GP",
+        "Speilberg STT",
+        "Speilberg (Short)",
+        "Speilberg (Historic 1974)",
+        "Speilberg (Historic 1977)",
+        "Sudschleife (Historic 1971) DLC",
+        "Taruma (Internacional)",
+        "Taruma (Chicane)",
+        "Termas de Rio Hondo",
+        "Tykki RX (DLC)",
+        "Tykki RX Tarmac (DLC)",
+        "Tykki RX Dirt 1 (DLC)",
+        "Tykki RX Dirt 2 (DLC)",
+        "Velo Citta",
+        "Velo Citta (Track Day)",
+        "Velo Citta (Club Day)",
+        "Velopark (2017)",
+        "Velopark (2010)",
+        "Velopark STT",
+        "Virginia International Raceway (Full)",
+        "Virginia International Raceway (Grand)",
+        "Virginia International Raceway (North)",
+        "Virginia International Raceway (South)",
+        "Virginia International Raceway (Patriot)",
+        "Watkins Glen GP DLC",
+        "Watkins Glen (Inner Loop) DLC",
+        "Watkins Glen (Short) DLC",
+        "Watkins Glen (Short Inner Loop) DLC",
+        "Watkins Glen STT"
+    ];
+    
+    // Check local storage first. If empty, load defaults.
+    let cars = JSON.parse(localStorage.getItem('tsra_cars'));
+    let tracks = JSON.parse(localStorage.getItem('tsra_tracks'));
+
+    if (!cars || cars.length === 0) {
+        cars = DEFAULT_CARS;
+    }
+    if (!tracks || tracks.length === 0) {
+        tracks = DEFAULT_TRACKS;
+    }
+
+    // --- Core Functions ---
+
+    // Attach password protection to the '™' activator on load
+    document.addEventListener('DOMContentLoaded', () => {
+        // The tm-activator is now on the h1's <span>
+        document.getElementById('tm-activator').addEventListener('click', passwordProtectedToggle);
+        updateUI();
+    });
+
+    function updateUI() {
+        // Update Stats
+        document.getElementById('stat-cars').innerText = cars.length;
+        document.getElementById('stat-tracks').innerText = tracks.length;
+        document.getElementById('stat-combos').innerText = (cars.length * tracks.length).toLocaleString();
+        
+        // Update Lists 
+        const carListElement = document.getElementById('car-list');
+        const trackListElement = document.getElementById('track-list');
+
+        if (carListElement) {
+             carListElement.innerHTML = cars.map((c, i) => `<div class="list-item">${c}<span class="remove-btn" onclick="remove('car', ${i})">×</span></div>`).join('');
+        }
+        if (trackListElement) {
+             trackListElement.innerHTML = tracks.map((t, i) => `<div class="list-item">${t}<span class="remove-btn" onclick="remove('track', ${i})">×</span></div>`).join('');
+        }
+        
+        // Save to local storage
+        localStorage.setItem('tsra_cars', JSON.stringify(cars));
+        localStorage.setItem('tsra_tracks', JSON.stringify(tracks));
+    }
+    
+    // Handles the password check and panel toggle
+    function passwordProtectedToggle() {
+        const panel = document.getElementById('bulk-util-panel');
+        
+        // If the panel is currently visible, clicking should just hide it without a password check
+        if (!panel.classList.contains('hidden')) {
+            panel.classList.add('hidden');
+            return;
+        }
+
+        // If the panel is hidden, prompt for the password
+        const password = prompt("Enter Admin Password:");
+
+        if (password === ADMIN_PASSWORD) {
+            panel.classList.remove('hidden');
+            // Ensure lists are rendered when panel opens
+            updateUI(); 
+        } else if (password !== null) { 
+            alert("Incorrect password. Access denied.");
+        }
+    }
+
+    function manualAddItem(type) {
+        const input = document.getElementById(`manual-${type}-input`);
+        const val = input.value.trim();
+        if (val) {
+            // Check for duplicates before adding
+            if (type === 'car' && !cars.includes(val)) cars.push(val);
+            else if (type === 'track' && !tracks.includes(val)) tracks.push(val);
+            
+            input.value = '';
+            updateUI();
+        }
+    }
+
+    function processBulk(type) {
+        const input = document.getElementById(`bulk-${type}-input`);
+        // Split input by newlines, trim whitespace, and filter out empty lines
+        const lines = input.value.split('\n').map(line => line.trim()).filter(line => line !== "");
+        
+        let newItems = [];
+        let currentList = (type === 'car') ? cars : tracks;
+        
+        lines.forEach(item => {
+            if (!currentList.includes(item)) {
+                newItems.push(item);
+            }
+        });
+
+        // Add new unique items to the list
+        if (type === 'car') cars = [...currentList, ...newItems];
+        else tracks = [...currentList, ...newItems];
+
+        input.value = '';
+        updateUI();
+        
+        // Detailed feedback
+        if (newItems.length > 0) {
+            alert(`Successfully imported ${newItems.length} new ${type}s. Total ${type}s: ${currentList.length + newItems.length}.`);
+        } else if (lines.length > 0) {
+            alert(`No new ${type}s were imported. All ${type}s from your pasted list already exist in the database.`);
+        } else {
+            alert(`No data detected in the Bulk ${type} input area. Please paste your list and try again.`);
+        }
+    }
+
+    function remove(type, index) {
+        if (type === 'car') cars.splice(index, 1);
+        else tracks.splice(index, 1);
+        updateUI();
+    }
+
+    function pickRandom() {
+        if (!cars.length || !tracks.length) return alert("Add data first!");
+        let count = 0;
+        const interval = setInterval(() => {
+            document.getElementById('car-display').innerText = cars[Math.floor(Math.random() * cars.length)];
+            document.getElementById('track-display').innerText = tracks[Math.floor(Math.random() * tracks.length)];
+            if (++count > 8) clearInterval(interval);
+        }, 60);
+    }
+
+    // Exports data in a simple, copy-paste format for Sheets/Text Editors
+    function exportListForSheets() {
+        let exportText = "--- CAR LIST ---\n" + cars.join('\n') + "\n\n" + "--- TRACK LIST ---\n" + tracks.join('\n');
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(exportText).then(() => {
+                alert("Car and Track lists copied to clipboard!\n\nPaste into Google Sheets or any text file.");
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                prompt("Lists ready to copy. Press Ctrl+C/Cmd+C to copy all text:", exportText);
+            });
+        } else {
+            prompt("Lists ready to copy. Press Ctrl+C/Cmd+C to copy all text:", exportText);
+        }
+    }
+
+    function exportJSONData() {
+        const blob = new Blob([JSON.stringify({ cars, tracks })], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'tsra_backup.json';
+        a.click();
+    }
+
+    function importData(event) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.cars && data.tracks) {
+                    cars = data.cars; 
+                    tracks = data.tracks; 
+                    updateUI();
+                    alert("Data imported successfully!");
+                } else {
+                    alert("Import failed: JSON file missing car/track lists.");
+                }
+            } catch (error) {
+                alert("Import failed: Invalid JSON file.");
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    function clearAll() {
+        if(confirm("WARNING: This will permanently delete ALL your saved cars and tracks. Do you want to continue?")) { 
+            cars = []; 
+            tracks = []; 
+            localStorage.removeItem('tsra_cars');
+            localStorage.removeItem('tsra_tracks');
+            localStorage.removeItem('tsra_history'); 
+            updateUI(); 
+            alert("All lists have been cleared!");
+        }
+    }
+
+    // Initial update call (This ensures default data is loaded on the first run)
+    updateUI(); 
+</script>
+</body>
+</html>
